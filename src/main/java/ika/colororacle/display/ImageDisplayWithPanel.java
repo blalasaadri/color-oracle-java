@@ -4,7 +4,10 @@
  * Created on February 22, 2007, 3:16 PM
  *
  */
-package ika.colororacle;
+package ika.colororacle.display;
+
+import ika.colororacle.ColorOracle;
+import ika.colororacle.display.ImageDisplay;
 
 import java.awt.Graphics;
 import java.awt.Graphics2D;

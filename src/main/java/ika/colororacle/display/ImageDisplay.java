@@ -4,7 +4,7 @@
  * Created on September 29, 2006, 10:01 AM
  *
  */
-package ika.colororacle;
+package ika.colororacle.display;
 
 import java.awt.Dimension;
 import java.awt.Graphics;

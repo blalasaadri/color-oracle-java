@@ -3,7 +3,7 @@
  *
  * Created on February 5, 2007, 10:00 AM
  */
-package ika.colororacle;
+package ika.colororacle.display;
 
 import java.awt.Desktop;
 import java.net.URI;

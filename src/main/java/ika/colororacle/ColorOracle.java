@@ -6,15 +6,16 @@
  */
 package ika.colororacle;
 
+import ika.colororacle.display.AboutPanel;
+
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.*;
 
 /**
  * ColorOracle is the main class of the program. It creates the tray icon and
@@ -23,7 +24,7 @@ import javax.swing.*;
  *
  * @author Bernhard Jenny, Institute of Cartography, ETH Zurich.
  */
-public class ColorOracle extends WindowAdapter implements KeyListener, FocusListener, MouseWheelListener {
+public class ColorOracle extends WindowAdapter {
 
     /**
      * A tooltip that is displayed when the mouse hovers over the tray icon.
@@ -57,12 +58,93 @@ public class ColorOracle extends WindowAdapter implements KeyListener, FocusList
      */
     private static final long SLEEP_BEFORE_SCREENSHOT_MILLISECONDS = 300;
 
+    KeyListener keyListener = new KeyListener() {
+
+        /**
+         * Event handler that is called when the user types a key and the window
+         * displaying the simulated color blind image has the current key focus.
+         */
+        @Override
+        public void keyTyped(KeyEvent e) {
+            switchToNormalVision();
+        }
+
+        /**
+         * Event handler that is called when the user presses a key down and the
+         * window displaying the simulated color blind image has the current key
+         * focus.
+         */
+        @Override
+        public void keyPressed(KeyEvent e) {
+            switchToNormalVision();
+        }
+
+        /**
+         * Event handler that is called when the user releases a key and the window
+         * displaying the simulated color blind image has the current key focus.
+         */
+        @Override
+        public void keyReleased(KeyEvent e) {
+            switchToNormalVision();
+        }
+
+    };
+
+    FocusListener focusListener = new FocusListener() {
+        @Override
+        public void focusGained(FocusEvent e) {
+        }
+
+        /**
+         * Event handler that is called when the window displaying the simulated
+         * colorblind image looses the focus.
+         */
+        @Override
+        public void focusLost(FocusEvent e) {
+            try {
+                // e.ggetOppositeComponent() returns null when a window of another
+                // application is activated. Don't hide the windows on a system
+                // with multiple screens when the user switches between our windows.
+                if (e.getOppositeComponent() != null) {
+                    return;
+                }
+
+                long currentTime = System.currentTimeMillis();
+                if (currentTime > timeOfLastFocusLost) {
+                    timeOfLastFocusLost = currentTime;
+                }
+            } catch (Exception ex) {
+                Logger.getLogger(ColorOracle.class.getName()).log(Level.SEVERE, null, ex);
+                switchToNormalVision();
+            }
+        }
+    };
+
+    MouseWheelListener mouseWheelListener = new MouseWheelListener() {
+
+        /**
+         * Hide the simulation when the mouse wheel is scrolled.
+         *
+         * @param e
+         */
+        @Override
+        public void mouseWheelMoved(MouseWheelEvent e) {
+            if (e.getWheelRotation() != 0) {
+                switchToNormalVision();
+            }
+        }
+    };
+
     /**
      * Enumerate the four possible states of the current simulation.
      */
     protected enum Simulation {
 
-        normal, deutan, protan, tritan, grayscale
+        normal, deutan, protan, tritan, grayscale;
+
+        Simulation next() {
+            return values()[(this.ordinal() + 1) % values().length];
+        }
     }
 
     /**
@@ -99,96 +181,11 @@ public class ColorOracle extends WindowAdapter implements KeyListener, FocusList
 
     private long timeOfLastFocusLost = 0;
 
-    /**
-     * Entry point for the Color Oracle application.
-     *
-     * @param args The standard command line arguments, which are ignored.
-     */
-    public static void main(String[] args) throws IOException {
-
-        // don't run in headless mode
-        if (GraphicsEnvironment.isHeadless()) {
-            System.err.println("Headless mode not supported by Color Oracle.");
-            System.exit(-1);
-            return;
-        }
-
-        // default Look and Feel on some systems is Metal, install the native 
-        // look and feel instead.  
-        String nativeLF = UIManager.getSystemLookAndFeelClassName();
-        try {
-            UIManager.setLookAndFeel(nativeLF);
-        } catch (Exception ex) {
-            Logger.getLogger(ColorOracle.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        // set icon for JOptionPane dialogs, e.g. for error messages.
-        ColorOracle.setOptionPaneIcons("/icons/icon48x48.png");
-
-        // make sure screenshots are allowed by the security manager
-        try {
-            SecurityManager security = System.getSecurityManager();
-            if (security != null) {
-                security.checkPermission(new AWTPermission("createRobot"));
-                security.checkPermission(new AWTPermission("readDisplayPixels"));
-            }
-        } catch (SecurityException ex) {
-            Logger.getLogger(ColorOracle.class.getName()).log(Level.SEVERE, null, ex);
-            ColorOracle.showErrorMessage("Screenshots are not possible on "
-                    + "your system.", true);
-            System.exit(-1);
-            return;
-        }
-
-        // test whether the system supports the SystemTray
-        try {
-            if (!SystemTray.isSupported()) {
-                throw new UnsupportedOperationException("SystemTray not supported");
-            }
-        } catch (Exception ex) {
-            ColorOracle.showErrorMessage("Access to the system tray or "
-                    + "notification area \nis not supported on your system.",
-                    true);
-            Logger.getLogger(ColorOracle.class.getName()).log(Level.SEVERE, null, ex);
-            System.exit(-1);
-            return;
-        }
-
-        java.awt.EventQueue.invokeLater(new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    new ColorOracle();
-                } catch (Exception ex) {
-                    Logger.getLogger(ColorOracle.class.getName()).log(Level.SEVERE, null, ex);
-                    System.exit(-1);
-                }
-            }
-        });
-    }
-
-    /**
-     * Changes the icon displayed in JOptionPane dialogs to the passed icon.
-     * Error, information, question and warning dialogs will show this icon.
-     * This will also replace the icon in ProgressMonitor dialogs.
-     */
-    private static void setOptionPaneIcons(String iconPath) {
-        LookAndFeel lf = UIManager.getLookAndFeel();
-        if (lf != null) {
-            Class iconBaseClass = lf.getClass();
-            Object appIcon = LookAndFeel.makeIcon(iconBaseClass, iconPath);
-            UIManager.put("OptionPane.errorIcon", appIcon);
-            UIManager.put("OptionPane.informationIcon", appIcon);
-            UIManager.put("OptionPane.questionIcon", appIcon);
-            UIManager.put("OptionPane.warningIcon", appIcon);
-        }
-    }
 
     /**
      * Constructor of Color Oracle. Initializes the tray icon and its menu.
      */
-    private ColorOracle() throws Exception {
+    ColorOracle() throws Exception {
         initTrayIcon();
     }
 
@@ -196,9 +193,8 @@ public class ColorOracle extends WindowAdapter implements KeyListener, FocusList
      * Loads a raster icon from the /ika/icons/ folder.
      *
      * @param name The name of the icon.
-     * @description A description of the icon that is attached to it.
      * @return An ImageIcon.
-     *
+     * @description A description of the icon that is attached to it.
      */
     public static ImageIcon loadImageIcon(String name, String description) {
 
@@ -225,7 +221,6 @@ public class ColorOracle extends WindowAdapter implements KeyListener, FocusList
      *
      * @param name The name of the icon.
      * @return The icon as Image object.
-     *
      */
     public static Image loadImage(String name) {
         ImageIcon icon = loadImageIcon(name, "");
@@ -263,7 +258,7 @@ public class ColorOracle extends WindowAdapter implements KeyListener, FocusList
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                simulate(ColorOracle.Simulation.deutan);
+                simulate(currentSimulation.next());
             }
         };
 
@@ -476,7 +471,7 @@ public class ColorOracle extends WindowAdapter implements KeyListener, FocusList
 
     }
 
-    private static void showErrorMessage(String msg, boolean showExitButton) {
+    static void showErrorMessage(String msg, boolean showExitButton) {
 
         if (msg == null || msg.trim().length() < 3) {
             msg = "An error occurred.";
@@ -557,6 +552,9 @@ public class ColorOracle extends WindowAdapter implements KeyListener, FocusList
                 case grayscale:
                     simulateAndShow(grayscalePanel);
                     break;
+                case normal:
+                    switchToNormalVision();
+                    break;
             }
         } catch (Exception ex) {
             Logger.getLogger(ColorOracle.class.getName()).log(Level.SEVERE, null, ex);
@@ -579,34 +577,6 @@ public class ColorOracle extends WindowAdapter implements KeyListener, FocusList
     }
 
     /**
-     * Event handler that is called when the user types a key and the window
-     * displaying the simulated color blind image has the current key focus.
-     */
-    @Override
-    public void keyTyped(KeyEvent e) {
-        switchToNormalVision();
-    }
-
-    /**
-     * Event handler that is called when the user presses a key down and the
-     * window displaying the simulated color blind image has the current key
-     * focus.
-     */
-    @Override
-    public void keyPressed(KeyEvent e) {
-        switchToNormalVision();
-    }
-
-    /**
-     * Event handler that is called when the user releases a key and the window
-     * displaying the simulated color blind image has the current key focus.
-     */
-    @Override
-    public void keyReleased(KeyEvent e) {
-        switchToNormalVision();
-    }
-
-    /**
      * Event handler that is called when the window displaying the simulated
      * color blind image is deactivated.
      */
@@ -626,34 +596,6 @@ public class ColorOracle extends WindowAdapter implements KeyListener, FocusList
                 timeOfLastFocusLost = currentTime;
             }
             startDeactivatingTimer();
-        } catch (Exception ex) {
-            Logger.getLogger(ColorOracle.class.getName()).log(Level.SEVERE, null, ex);
-            switchToNormalVision();
-        }
-    }
-
-    @Override
-    public void focusGained(FocusEvent e) {
-    }
-
-    /**
-     * Event handler that is called when the window displaying the simulated
-     * colorblind image looses the focus.
-     */
-    @Override
-    public void focusLost(FocusEvent e) {
-        try {
-            // e.ggetOppositeComponent() returns null when a window of another
-            // application is activated. Don't hide the windows on a system
-            // with multiple screens when the user switches between our windows.
-            if (e.getOppositeComponent() != null) {
-                return;
-            }
-
-            long currentTime = System.currentTimeMillis();
-            if (currentTime > timeOfLastFocusLost) {
-                timeOfLastFocusLost = currentTime;
-            }
         } catch (Exception ex) {
             Logger.getLogger(ColorOracle.class.getName()).log(Level.SEVERE, null, ex);
             switchToNormalVision();
@@ -690,7 +632,7 @@ public class ColorOracle extends WindowAdapter implements KeyListener, FocusList
      * removed, nor is the file name altered in any other way.
      *
      * @param fileName The name of the file.
-     * @param ext The extension of the file that will be appended if necessary.
+     * @param ext      The extension of the file that will be appended if necessary.
      * @return The new file name with the required extension.
      */
     public static String forceFileNameExtension(String fileName, String ext) {
@@ -721,17 +663,5 @@ public class ColorOracle extends WindowAdapter implements KeyListener, FocusList
 
         return fileName;
 
-    }
-
-    /**
-     * Hide the simulation when the mouse wheel is scrolled.
-     *
-     * @param e
-     */
-    @Override
-    public void mouseWheelMoved(MouseWheelEvent e) {
-        if (e.getWheelRotation() != 0) {
-            switchToNormalVision();
-        }
     }
 }

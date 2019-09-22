@@ -72,10 +72,10 @@ final class Screen {
         // Therefore the mouse wheel event listener is attached to a child of
         // the MainWindow (the ContentPane).
         // Note: mouse events are handled by ImageDisplayWithPanel
-        simulationWindow.addKeyListener(colorOracle);
+        simulationWindow.addKeyListener(colorOracle.keyListener);
         simulationWindow.addWindowListener(colorOracle);
-        simulationWindow.addFocusListener(colorOracle);
-        simulationWindow.getContentPane().addMouseWheelListener(colorOracle);
+        simulationWindow.addFocusListener(colorOracle.focusListener);
+        simulationWindow.getContentPane().addMouseWheelListener(colorOracle.mouseWheelListener);
 
         //System.out.println("Window: " + getUsableScreenArea());
         // set size and position of the window

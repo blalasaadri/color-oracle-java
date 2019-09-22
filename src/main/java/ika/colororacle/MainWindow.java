@@ -5,6 +5,8 @@
  */
 package ika.colororacle;
 
+import ika.colororacle.display.ImageDisplayWithPanel;
+
 import java.awt.Image;
 
 /**
@@ -15,7 +17,7 @@ import java.awt.Image;
  */
 public class MainWindow extends javax.swing.JDialog {
 
-    private final ika.colororacle.ImageDisplayWithPanel imageDisplayWithPanel;
+    private final ImageDisplayWithPanel imageDisplayWithPanel;
 
     /**
      * Creates new form MainWindow

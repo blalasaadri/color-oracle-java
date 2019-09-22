@@ -37,7 +37,7 @@
             <index>true</index>
             <manifest>
               <addClasspath>true</addClasspath>
-              <mainClass>ika.colororacle.ColorOracle</mainClass>
+              <mainClass>ika.colororacle.Main</mainClass>
             </manifest>
           </archive>
         </configuration>
