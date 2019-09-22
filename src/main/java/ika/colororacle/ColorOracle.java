@@ -123,7 +123,7 @@ public class ColorOracle extends WindowAdapter implements KeyListener, FocusList
         }
 
         // set icon for JOptionPane dialogs, e.g. for error messages.
-        ColorOracle.setOptionPaneIcons("/ika/icons/icon48x48.png");
+        ColorOracle.setOptionPaneIcons("/icons/icon48x48.png");
 
         // make sure screenshots are allowed by the security manager
         try {
@@ -203,7 +203,7 @@ public class ColorOracle extends WindowAdapter implements KeyListener, FocusList
     public static ImageIcon loadImageIcon(String name, String description) {
 
         try {
-            String folder = "/ika/icons/";
+            String folder = "/icons/";
             java.net.URL imgURL = ColorOracle.class.getResource(folder + name);
             if (imgURL != null) {
                 ImageIcon imageIcon = new ImageIcon(imgURL, description);
