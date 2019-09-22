@@ -1,6 +1,7 @@
 package ika.colororacle;
 
-import com.muchsoft.util.Sys;
+import org.apache.commons.lang3.SystemUtils;
+
 import java.awt.AWTException;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
@@ -35,7 +36,7 @@ final class Screen {
         // multiple monitors are only supported by Color Oracle on Windows systems.
         // Linux systems are not reliable. Mac is inconsitent between versions
         // for Robot.createScreenCapture().
-        if (Sys.isWindows()) {
+        if (SystemUtils.IS_OS_WINDOWS) {
             GraphicsDevice[] gs = ge.getScreenDevices();
             for (GraphicsDevice gd : gs) {
                 Screen.screens.add(new Screen(gd.getDefaultConfiguration()));
