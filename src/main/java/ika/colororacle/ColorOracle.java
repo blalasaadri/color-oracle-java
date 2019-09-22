@@ -102,7 +102,7 @@ public class ColorOracle extends WindowAdapter {
         @Override
         public void focusLost(FocusEvent e) {
             try {
-                // e.ggetOppositeComponent() returns null when a window of another
+                // e.getOppositeComponent() returns null when a window of another
                 // application is activated. Don't hide the windows on a system
                 // with multiple screens when the user switches between our windows.
                 if (e.getOppositeComponent() != null) {
@@ -193,10 +193,10 @@ public class ColorOracle extends WindowAdapter {
      * Loads a raster icon from the /ika/icons/ folder.
      *
      * @param name The name of the icon.
+     * @param description A description of the icon that is attached to it.
      * @return An ImageIcon.
-     * @description A description of the icon that is attached to it.
      */
-    public static ImageIcon loadImageIcon(String name, String description) {
+    private static ImageIcon loadImageIcon(String name, String description) {
 
         try {
             String folder = "/icons/";
@@ -222,7 +222,7 @@ public class ColorOracle extends WindowAdapter {
      * @param name The name of the icon.
      * @return The icon as Image object.
      */
-    public static Image loadImage(String name) {
+    private static Image loadImage(String name) {
         ImageIcon icon = loadImageIcon(name, "");
         return icon.getImage();
     }
@@ -272,8 +272,7 @@ public class ColorOracle extends WindowAdapter {
         // create the TrayIcon
         TrayIcon trayIcon = new TrayIcon(image, TOOLTIP, menu);
         trayIcon.addActionListener(defaultActionListener);
-        trayIcon.addMouseListener(new MouseListener() {
-
+        trayIcon.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 // event handler that remembers the last time the tray icon was clicked.
@@ -281,22 +280,6 @@ public class ColorOracle extends WindowAdapter {
                 if (currentTime > timeOfLastClickOnTrayIcon) {
                     timeOfLastClickOnTrayIcon = currentTime;
                 }
-            }
-
-            @Override
-            public void mousePressed(MouseEvent e) {
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-            }
-
-            @Override
-            public void mouseEntered(MouseEvent e) {
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
             }
         });
         trayIcon.setImageAutoSize(false);

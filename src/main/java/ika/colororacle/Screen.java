@@ -12,19 +12,20 @@ import java.awt.Robot;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.List;
 
 final class Screen {
 
     /**
      * An array with all attached screens.
      */
-    private static final ArrayList<Screen> screens = new ArrayList<Screen>();
+    private static final List<Screen> screens = new ArrayList<>();
 
-    public static ArrayList<Screen> getScreens() {
+    static List<Screen> getScreens() {
         return screens;
     }
 
-    public static void detectScreens() {
+    static void detectScreens() {
 
         // remove previous screens
         Screen.screens.clear();
@@ -46,9 +47,9 @@ final class Screen {
 
     }
 
-    public MainWindow simulationWindow = null;
-    public BufferedImage screenshotImage = null;
-    public GraphicsConfiguration gc = null;
+    private MainWindow simulationWindow = null;
+    BufferedImage screenshotImage = null;
+    private GraphicsConfiguration gc = null;
 
     private Screen(GraphicsConfiguration gc) {
         super();
@@ -99,7 +100,7 @@ final class Screen {
         return screenRect;
     }
 
-    public void takeScreenshot() throws AWTException {
+    void takeScreenshot() throws AWTException {
         Toolkit toolkit = Toolkit.getDefaultToolkit();
         if (toolkit == null) {
             return;
@@ -116,7 +117,7 @@ final class Screen {
         screenshotImage = robot.createScreenCapture(screenRect);
     }
 
-    public void showSimulationImage(BufferedImage simulationImage,
+    void showSimulationImage(BufferedImage simulationImage,
             ColorOracle colorOracle, Image panel) {
 
         // don't create a window if there is already one visible
@@ -138,7 +139,7 @@ final class Screen {
      * Hides the simulation window and deallocates the window and the screenshot
      * image.
      */
-    public void hideSimulation() {
+    void hideSimulation() {
 
         if (simulationWindow != null) {
             simulationWindow.setVisible(false);

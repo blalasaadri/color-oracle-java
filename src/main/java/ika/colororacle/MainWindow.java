@@ -15,14 +15,14 @@ import java.awt.Image;
  *
  * @author Bernhard Jenny, Institute of Cartography, ETH Zurich.
  */
-public class MainWindow extends javax.swing.JDialog {
+class MainWindow extends javax.swing.JDialog {
 
     private final ImageDisplayWithPanel imageDisplayWithPanel;
 
     /**
      * Creates new form MainWindow
      */
-    public MainWindow(java.awt.Frame parent, boolean modal, ColorOracle colorOracle) {
+    MainWindow(java.awt.Frame parent, boolean modal, ColorOracle colorOracle) {
         super(parent, modal);
 
         setUndecorated(true);
@@ -40,7 +40,7 @@ public class MainWindow extends javax.swing.JDialog {
     /**
      * Set the image to display.
      */
-    public void setImage(Image image) {
+    void setImage(Image image) {
         imageDisplayWithPanel.setImage(image);
         validate();
         pack();
@@ -53,7 +53,7 @@ public class MainWindow extends javax.swing.JDialog {
     /**
      * Set the image panel to draw over the image set by setImage().
      */
-    public void setPanel(Image panel) {
+    void setPanel(Image panel) {
         imageDisplayWithPanel.setPanel(panel);
         repaint();
     }
